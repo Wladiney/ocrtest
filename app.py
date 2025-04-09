@@ -1,3 +1,4 @@
+from cte_qrcode import router as cte_router
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from typing import Dict, Optional
 import pytesseract
