@@ -255,4 +255,4 @@ def extrair_por_label(soup: BeautifulSoup, labels: list) -> str:
     return ""
 
 # Para adicionar o router à sua aplicação principal, use:
-# app.include_router(router)
+app.include_router(router)
