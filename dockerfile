@@ -23,7 +23,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copiar o código da aplicação
 COPY app.py .
-
+COPY cte_qrcode.py .
 # Expor a porta que a aplicação vai usar
 EXPOSE 8000
 
