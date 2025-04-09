@@ -1,9 +1,15 @@
 FROM python:3.9-slim
 
 # Instalar dependências do sistema, incluindo o Tesseract OCR e suporte para português
+# Adicionamos o libgl1 e outras libs necessárias para o OpenCV
 RUN apt-get update && apt-get install -y \
     tesseract-ocr \
     tesseract-ocr-por \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
