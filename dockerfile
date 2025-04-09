@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
     libsm6 \
     libxext6 \
     libxrender-dev \
+    libzbar0 \  # Esta é a nova linha para o pyzbar
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
