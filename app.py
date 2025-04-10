@@ -10,6 +10,7 @@ import logging
 import numpy as np
 import cv2
 from functools import lru_cache
+from fastapi.middleware.cors import CORSMiddleware
 
 # Configuração de logging
 logging.basicConfig(level=logging.INFO)
