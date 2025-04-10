@@ -21,6 +21,25 @@ app = FastAPI(title="API de Extração de Cupom Fiscal",
 # Para adicionar o router à sua aplicação principal, use:
 app.include_router(cte_router)
 
+
+
+# Definindo as origens que podem acessar o servidor
+origins = [
+    "*",  # Permitir todas as origens
+    # Se você quiser restringir a algumas origens específicas, use:
+    # "http://example.com",
+    # "https://meuapp.com",
+]
+
+# Adicionando o middleware CORS ao aplicativo
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # Aqui definimos as origens permitidas
+    allow_credentials=True,
+    allow_methods=["*"],  # Permitir todos os métodos (GET, POST, PUT, DELETE, etc)
+    allow_headers=["*"],  # Permitir todos os cabeçalhos
+)
+
 # Tamanho máximo para redimensionamento (preserva a proporção)
 MAX_SIZE = 1200
 
