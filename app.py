@@ -19,7 +19,7 @@ app = FastAPI(title="API de Extração de Cupom Fiscal",
               description="API que recebe imagem de cupom fiscal e retorna o valor total")
 
 # Para adicionar o router à sua aplicação principal, use:
-app.include_router(router)
+app.include_router(cte_router)
 
 # Tamanho máximo para redimensionamento (preserva a proporção)
 MAX_SIZE = 1200
