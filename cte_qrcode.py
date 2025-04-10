@@ -113,8 +113,201 @@ async def extrair_cte_qrcode(file: UploadFile = File(...)):
         )
     finally:
         await file.close()
-
 def extrair_dados_cte(soup: BeautifulSoup) -> Dict[str, Any]:
+    """
+    Extrai os dados de um Conhecimento de Transporte Eletrônico (CT-e) a partir do HTML.
+    
+    Args:
+        soup: Objeto BeautifulSoup contendo o HTML da página do CT-e
+        
+    Returns:
+        Dicionário contendo os dados estruturados do CT-e
+    """
+    resultado = {
+        "chave_acesso": None,
+        "dados_cte": {
+            "modelo": None,
+            "serie": None,
+            "numero": None,
+            "data_hora_emissao": None,
+            "tipo_emissao": None,
+            "modal": None,
+            "uf_inicio": None,
+            "uf_fim": None,
+            "natureza_operacao": None,
+            "cfop": None,
+            "valor_total": None
+        },
+        "emitente": {
+            "cnpj": None,
+            "ie": None,
+            "nome_razao_social": None,
+            "municipio": None,
+            "uf": None
+        },
+        "tomador": {
+            "cnpj": None,
+            "ie": None,
+            "nome_razao_social": None,
+            "municipio": None,
+            "uf": None,
+            "pais": None
+        },
+        "eventos": [],
+        "digest_value": None
+    }
+    
+    # Extrair chave de acesso
+    chave_acesso_div = soup.select_one('div:has(> label:-soup-contains("Chave de acesso")) + div')
+    if chave_acesso_div:
+        resultado["chave_acesso"] = chave_acesso_div.text.strip()
+    
+    # Extrair dados do CT-e
+    dados_cte_div = soup.select_one('#dadosCTe')
+    if dados_cte_div:
+        # Modelo
+        modelo_div = dados_cte_div.select_one('div.row:has(div:has(label:-soup-contains("Modelo"))) + div div:nth-child(1)')
+        if modelo_div:
+            resultado["dados_cte"]["modelo"] = modelo_div.text.strip()
+        
+        # Série
+        serie_div = dados_cte_div.select_one('div.row:has(div:has(label:-soup-contains("Série"))) + div div:nth-child(2)')
+        if serie_div:
+            resultado["dados_cte"]["serie"] = serie_div.text.strip()
+        
+        # Número
+        numero_div = dados_cte_div.select_one('div.row:has(div:has(label:-soup-contains("Número"))) + div div:nth-child(3)')
+        if numero_div:
+            resultado["dados_cte"]["numero"] = numero_div.text.strip()
+        
+        # Data/Hora da emissão
+        data_hora_div = dados_cte_div.select_one('div.row:has(div:has(label:-soup-contains("Data/Hora da emissão"))) + div div:nth-child(4)')
+        if data_hora_div:
+            resultado["dados_cte"]["data_hora_emissao"] = data_hora_div.text.strip()
+        
+        # Tipo de Emissão
+        emissao_div = dados_cte_div.select_one('div.row:has(div:has(label:-soup-contains("Emissão"))) + div div:nth-child(1)')
+        if emissao_div:
+            resultado["dados_cte"]["tipo_emissao"] = emissao_div.text.strip()
+        
+        # Modal
+        modal_div = dados_cte_div.select_one('div.row:has(div:has(label:-soup-contains("Modal"))) + div div:nth-child(2)')
+        if modal_div:
+            resultado["dados_cte"]["modal"] = modal_div.text.strip()
+        
+        # UF Início
+        uf_inicio_div = dados_cte_div.select_one('div.row:has(div:has(label:-soup-contains("UF início"))) + div div:nth-child(3)')
+        if uf_inicio_div:
+            resultado["dados_cte"]["uf_inicio"] = uf_inicio_div.text.strip()
+        
+        # UF Fim
+        uf_fim_div = dados_cte_div.select_one('div.row:has(div:has(label:-soup-contains("UF fim"))) + div div:nth-child(4)')
+        if uf_fim_div:
+            resultado["dados_cte"]["uf_fim"] = uf_fim_div.text.strip()
+        
+        # Natureza da operação
+        natureza_operacao_div = dados_cte_div.select_one('div.row:has(div:has(label:-soup-contains("Natureza da operação"))) + div div:nth-child(1)')
+        if natureza_operacao_div:
+            resultado["dados_cte"]["natureza_operacao"] = natureza_operacao_div.text.strip()
+        
+        # CFOP
+        cfop_div = dados_cte_div.select_one('div.row:has(div:has(label:-soup-contains("CFOP"))) + div div:nth-child(2)')
+        if cfop_div:
+            resultado["dados_cte"]["cfop"] = cfop_div.text.strip()
+        
+        # Valor Total
+        valor_total_div = dados_cte_div.select_one('div.row:has(div:has(label:-soup-contains("Valor Total"))) + div div:nth-child(3)')
+        if valor_total_div:
+            valor_texto = valor_total_div.text.strip()
+            # Converter para float se possível
+            try:
+                valor_texto = valor_texto.replace('.', '').replace(',', '.')
+                resultado["dados_cte"]["valor_total"] = float(valor_texto)
+            except:
+                resultado["dados_cte"]["valor_total"] = valor_texto
+    
+    # Extrair dados do emitente
+    emitente_div = soup.select_one('#emitente')
+    if emitente_div:
+        # CNPJ Emitente
+        cnpj_div = emitente_div.select_one('div.row:has(div:has(label:-soup-contains("CNPJ"))) + div div:nth-child(1)')
+        if cnpj_div:
+            resultado["emitente"]["cnpj"] = cnpj_div.text.strip()
+        
+        # IE Emitente
+        ie_div = emitente_div.select_one('div.row:has(div:has(label:-soup-contains("IE"))) + div div:nth-child(2)')
+        if ie_div:
+            resultado["emitente"]["ie"] = ie_div.text.strip()
+        
+        # Nome/Razão Social Emitente
+        razao_social_div = emitente_div.select_one('div.row:has(div:has(label:-soup-contains("Nome/Razão Social"))) + div div:nth-child(3)')
+        if razao_social_div:
+            resultado["emitente"]["nome_razao_social"] = razao_social_div.text.strip()
+        
+        # Município Emitente
+        municipio_div = emitente_div.select_one('div.row:has(div:has(label:-soup-contains("Município"))) + div div:nth-child(1)')
+        if municipio_div:
+            resultado["emitente"]["municipio"] = municipio_div.text.strip()
+        
+        # UF Emitente
+        uf_div = emitente_div.select_one('div.row:has(div:has(label:-soup-contains("UF"))) + div div:nth-child(2)')
+        if uf_div:
+            resultado["emitente"]["uf"] = uf_div.text.strip()
+    
+    # Extrair dados do tomador
+    tomador_div = soup.select_one('#tomador')
+    if tomador_div:
+        # CNPJ Tomador
+        cnpj_div = tomador_div.select_one('div.row:has(div:has(label:-soup-contains("CNPJ"))) + div div:nth-child(1)')
+        if cnpj_div:
+            resultado["tomador"]["cnpj"] = cnpj_div.text.strip()
+        
+        # IE Tomador
+        ie_div = tomador_div.select_one('div.row:has(div:has(label:-soup-contains("IE"))) + div div:nth-child(2)')
+        if ie_div:
+            resultado["tomador"]["ie"] = ie_div.text.strip()
+        
+        # Nome/Razão Social Tomador
+        razao_social_div = tomador_div.select_one('div.row:has(div:has(label:-soup-contains("Nome/Razão Social"))) + div div:nth-child(3)')
+        if razao_social_div:
+            resultado["tomador"]["nome_razao_social"] = razao_social_div.text.strip()
+        
+        # Município Tomador
+        municipio_div = tomador_div.select_one('div.row:has(div:has(label:-soup-contains("Município"))) + div div:nth-child(1)')
+        if municipio_div:
+            resultado["tomador"]["municipio"] = municipio_div.text.strip()
+        
+        # UF Tomador
+        uf_div = tomador_div.select_one('div.row:has(div:has(label:-soup-contains("UF"))) + div div:nth-child(2)')
+        if uf_div:
+            resultado["tomador"]["uf"] = uf_div.text.strip()
+        
+        # País Tomador
+        pais_div = tomador_div.select_one('div.row:has(div:has(label:-soup-contains("País"))) + div div:nth-child(3)')
+        if pais_div:
+            resultado["tomador"]["pais"] = pais_div.text.strip()
+    
+    # Extrair eventos
+    eventos_div = soup.select_one('#eventos')
+    if eventos_div:
+        tabela_eventos = eventos_div.select('table tbody tr')
+        for linha in tabela_eventos:
+            cells = linha.select('td')
+            if len(cells) >= 3:
+                evento = {
+                    "tipo": cells[0].text.strip(),
+                    "protocolo": cells[1].text.strip(),
+                    "data_autorizacao": cells[2].text.strip()
+                }
+                resultado["eventos"].append(evento)
+    
+    # Extrair DigestValue
+    digest_value_div = soup.select_one('div.row:has(div:has(label:-soup-contains("Digest Value"))) + div div')
+    if digest_value_div:
+        resultado["digest_value"] = digest_value_div.text.strip()
+    
+    return resultado 
+def extrair_dados_cte2(soup: BeautifulSoup) -> Dict[str, Any]:
     """
     Extrai os dados de um CT-e da página HTML
     
