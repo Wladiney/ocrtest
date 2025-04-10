@@ -77,6 +77,23 @@ async def extrair_cte_qrcode(file: UploadFile = File(...)):
         
         logger.info("Acessando a URL do QR code")
         response = requests.get(qr_url, headers=headers, timeout=10)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # Passo 2: Pega a URL do formulário
+        form = soup.find('form', id='frmConsultaQrCode')
+        action_url = form.get('action')  # /Cte/QrCode
+        post_url = requests.compat.urljoin(qr_url, action_url)
+        
+        # Passo 3: Extrai os dados do formulário
+        form_data = {}
+        for input_tag in form.find_all('input'):
+            name = input_tag.get('name')
+            value = input_tag.get('value', '')
+            form_data[name] = value
+        
+        # Passo 4: Faz o POST simulando o envio automático do form
+        post_response = requests.post(post_url, data=form_data, headers=headers)
+        response = post_response
         
         if response.status_code != 200:
             raise HTTPException(
@@ -86,7 +103,7 @@ async def extrair_cte_qrcode(file: UploadFile = File(...)):
         
         # Parsear o HTML da página
         logger.info("Fazendo o parsing do HTML da página")
-        soup = BeautifulSoup(response.text, 'html.parser')
+        soup = BeautifulSoup(post_response.text, 'html.parser')
         
         # Extrair dados do CT-e
         cte_dados = extrair_dados_cte(soup)
