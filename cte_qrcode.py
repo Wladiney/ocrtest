@@ -156,7 +156,7 @@ def extrair_dados_cte(soup: BeautifulSoup) -> Dict[str, Any]:
         "eventos": [],
         "digest_value": None
     }
-    
+    logger.error(f" {str(soup)}")
     # Extrair chave de acesso
     chave_acesso_div = soup.select_one('div:has(> label:-soup-contains("Chave de acesso")) + div')
     if chave_acesso_div:
@@ -305,7 +305,7 @@ def extrair_dados_cte(soup: BeautifulSoup) -> Dict[str, Any]:
     digest_value_div = soup.select_one('div.row:has(div:has(label:-soup-contains("Digest Value"))) + div div')
     if digest_value_div:
         resultado["digest_value"] = digest_value_div.text.strip()
-    
+    logger.error(f" {str(resultado)}")
     return resultado 
 def extrair_dados_cte2(soup: BeautifulSoup) -> Dict[str, Any]:
     """
